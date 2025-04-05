@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Firebase</title>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <h2>CRUD de Produtos</h2>
+    
+    <input type="text" id="productId" placeholder="ID do Produto">
+    <input type="text" id="productDesc" placeholder="Descrição do Produto">
+    <input type="text" id="productPrice" placeholder="Preço do Produto">
+    <button onclick="addProduct()">Adicionar</button>
+
+    <h3>Lista de Produtos</h3>
+    <ul id="productList"></ul>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            console.log("Página carregada, iniciando Firebase...");
+
+            // Configuração do Firebase
+            const firebaseConfig = {
+                apiKey: "AIzaSyAEm9009-jzldbyCuc6xlPXUf64HGnOzLw",
+                authDomain: "pagina-web-crud.firebaseapp.com",
+                databaseURL: "https://pagina-web-crud-default-rtdb.firebaseio.com/",
+                projectId: "pagina-web-crud",
+                storageBucket: "pagina-web-crud.firebasestorage.app",
+                messagingSenderId: "389321958046",
+                appId: "1:389321958046:web:d0d3e4aeec9aabb138918f",
+                measurementId: "G-VW0HG744ZV"
+};
+
+            // Inicializa o Firebase
+            firebase.initializeApp(firebaseConfig);
+
+            console.log("Firebase carregado?", firebase.apps.length > 0);
+
+            // Referência ao banco de dados
+            const db = firebase.database().ref("produtos");
+            console.log("Banco de dados inicializado com sucesso!");
+
+            // Função para adicionar produto
+            function addProduct() {
+                let id = document.getElementById("productId").value.trim();
+                let desc = document.getElementById("productDesc").value.trim();
+                let price = document.getElementById("productPrice").value.trim();
+
+                console.log("Tentando adicionar produto:", id, desc, price);
+
+                if (id && desc && price) {
+                    db.child(id).set({ descricao: desc }).set({ preço: price})
+                        .then(() => console.log("Produto adicionado com sucesso!"))
+                        .catch(error => console.error("Erro ao adicionar:", error));
+
+                    document.getElementById("productId").value = "";
+                    document.getElementById("productDesc").value = "";
+                    document.getElementById("productPrice").value = "";
+                } else {
+                    console.error("ID, descrição ou preço estão vazios!");
+                    alert("Preencha todos os campos!");
+                }
+            }
+
+            // Função para excluir produto
+            function deleteProduct(id) {
+                if (confirm(`Tem certeza que deseja excluir o produto ${id}?`)) {
+                    db.child(id).remove()
+                        .then(() => console.log("Produto excluído:", id))
+                        .catch(error => console.error("Erro ao excluir:", error));
+                }
+            }
+
+            // Função para atualizar produto
+            function updateProduct(id) {
+                let newDesc = prompt("Digite a nova descrição:");
+                if (newDesc) {
+                    db.child(id).update({ descricao: newDesc })
+                        .then(() => console.log("Produto atualizado:", id))
+                        .catch(error => console.error("Erro ao atualizar:", error));
+                }
+            }
+
+            // Monitora mudanças no banco e atualiza a lista
+            db.on("value", (snapshot) => {
+                let list = document.getElementById("productList");
+                list.innerHTML = "";
+
+                snapshot.forEach((childSnapshot) => {
+                    let id = childSnapshot.key;
+                    let desc = childSnapshot.val().descricao;
+
+                    let li = document.createElement("li");
+                    li.innerHTML = `${id}: ${desc} 
+                        <button onclick="deleteProduct('${id}')">Excluir</button>
+                        <button onclick="updateProduct('${id}')">Editar</button>`;
+                    list.appendChild(li);
+                });
+
+                console.log("Lista atualizada!");
+            });
+
+            // Expor funções globalmente para os botões funcionarem
+            window.addProduct = addProduct;
+            window.deleteProduct = deleteProduct;
+            window.updateProduct = updateProduct;
+        });
+
+        
+    </script>
+</body>
+</html>
