@@ -1,0 +1,282 @@
+<!--Página principal (catálogo de produtos)-->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+	<title>Home</title>
+
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="">
+	<meta name="keywords" content="">
+	<meta name="author" content="Nicholly Gonzaga">
+
+	<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+	<!-- Importando a fonte "Orbitron" do Google Fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+
+	<style>
+		*{
+			box-sizing: border-box;
+		}
+		body {
+			font-family: Arial, Helvetica, sans-serif;
+			margin: 0;
+			padding: 0;
+			background-color: #f4f4f4;
+			display: flex;
+			flex-direction: column;
+			min-height: 100vh;
+		}
+
+		h2 {
+			color: #333;
+			text-align: center;
+		}
+
+		/* Cabeçalho e Menu */
+		header {
+			background-color: #333;
+			color: white;
+			padding: 20px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-family: orbitron;
+			font-size: 20px;
+		}
+
+		.logo {
+			display: flex;
+			align-items: center;
+		}
+
+		.logo img {
+			width: 150px;
+			margin-right: 15px;
+		}
+
+		.title {
+			font-size: 2em;
+			font-weight: bold;
+		}
+
+		.menu {
+			background-color: #222;
+			color: white;
+			text-align: center;
+			padding: 10px;
+		}
+
+		.menu a {
+			color: white;
+			text-decoration: none;
+			margin: 0 15px;
+			font-size: 	1em;
+		}
+
+		.menu a:hover {
+			text-decoration: underline;
+		}
+		
+
+		/* Catalogo de Produtos */
+		.catalog {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+			gap: 20px;
+			margin-top: 20px;
+			padding: 0 10px;
+			flex: 1;
+			width: 100%;
+		}
+
+		.product-card {
+			background-color: white;
+			border: 1px solid #ddd;
+			border-radius: 10px;
+			padding: 15px;
+			text-align: center;
+			box-shadow: 0 2px 5px rgb(0, 0, 0, 0.1);
+			transition: all 0.2s ease-in-out;
+			width: 100%;
+		}
+
+		.product-card h4 {
+			font-size: 1.2em;
+			margin: 10px 0;
+		}
+
+		.product-card p {
+            font-size: 1em;
+            margin: 10px 0;
+        }
+
+        .product-card button {
+            padding: 10px 15px;
+            margin-top: 10px;
+            background-color: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transform: scale(1.02);
+            cursor: pointer;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .catalog {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .product-card {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .menu a {
+                font-size: 0.9em;
+                margin: 0 8px;
+            }
+
+			header	{
+				flex-direction: column;
+				align-items: center;
+				text-align: center;
+			}
+
+			.logo img	{
+				width: 120px;
+				margin-bottom: 10px;
+			}
+
+			.title {
+				font-size: 1.8em;
+			}
+        }
+
+        /* Rodapé */
+        footer {
+            text-align: center;
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            width: 100%;
+            margin-top: auto;
+        }
+
+	</style>
+</head>
+
+<body>
+	<!-- Cabeçalho -->
+	<header>
+		<img src="/Website/IMG/logo-zumbits.png" width="150px" alt="Logo Zumbits">
+		<h1><b>	Zumbits </b></h1><br>
+
+	</header>
+
+	<!-- Menu -->
+	<div class="menu">
+		<a href="#">Home</a>
+		<a href="#">Produtos</a>
+		<a href="#">Sobre</a>
+		<a href="#">Contato</a>
+	</div>
+
+	<!-- Conteúdo do Catálogo -->
+	<section>
+		<h2>Catálogo de Produtos</h2>
+		<div id="productList" class="catalog"></div>
+		<br>
+	</section>
+
+	<!-- Rodapé -->
+	<footer>
+		<p>Copyright © 2025 | Zumbits </p>
+	</footer>
+
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+			console.log("Página carregada, iniciando Firebase...");
+	
+			// Configuração do Firebase
+			const firebaseConfig = {
+				apiKey: "AIzaSyCjjy2B9jb2XZW4nIfMj1xDLogZc8oBd9M",
+				authDomain: "estoque-naturale.firebaseapp.com",
+				databaseURL: "https://estoque-naturale-default-rtdb.firebaseio.com",
+				projectId: "estoque-naturale",
+				storageBucket: "estoque-naturale.firebasestorage.app",
+				messagingSenderId: "204707025194",
+				appId: "1:204707025194:web:158dd6235e0996b6e54e53",
+				measurementId: "G-ZJMVMSTSBJ"
+			};
+	
+			// Inicializa o Firebase
+			firebase.initializeApp(firebaseConfig);
+	
+			// Referência ao nó 'produtos'
+			const db = firebase.database().ref("produtos");
+	
+			// Executa mudanças em 'produtos'
+			db.on("value", (snapshot) => {
+				console.log("🔥 Firebase snapshot bruto:", snapshot.val());
+
+				const list = document.getElementById("productList");
+				list.innerHTML = ""; // limpa os cards antes de renderizar novamente
+	
+				const dados = snapshot.val();
+				console.log("Dados recebidos do Firebase:", dados);
+	
+				if (!dados) {
+					list.innerHTML = "<p>Nenhum produto cadastrado.</p>";
+					return;
+				}
+	
+				Object.entries(dados).forEach(([id, produto]) => {
+					const {
+						descricao,
+						precoVenda,
+						precoCusto,
+						categoria,
+						marca,
+						estoque,
+						status,
+						caracteristicas,
+						fornecedor,
+						dataCompra
+					} = produto;
+	
+					const card = document.createElement("div");
+					card.classList.add("product-card");
+	
+					card.innerHTML = `
+						<a href="product-detail.html?id=${id}" target="_blank" style="text-decoration: none; color: inherit; display: block;">
+							<h4>${descricao}</h4>
+							<p>R$ ${precoVenda?.toFixed(2) ?? "0.00"}</p>
+							<p>Marca: ${marca}</p>
+							<p>Estoque: ${estoque ?? "-"}</p>
+							<p>Status: ${status}</p>
+						</a>
+					`;
+	
+					list.appendChild(card);
+				});
+			});
+		});
+	</script>	
+</body>
+</html>
