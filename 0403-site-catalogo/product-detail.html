@@ -1,20 +1,77 @@
+<!--Página de detalhamento dos produtos-->
+
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-    <meta charset="UTF-8">
     <title>Detalhes do Produto</title>
+
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
+    <!-- Importando a fonte "Orbitron" do Google Fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+
     <style>
         body {
-            font-family: Arial, sans-serif;
-            padding: 30px;
-            max-width: 800px;
-            margin: auto;
+            font-family: Arial, Helvetica, sans-serif;
+			margin: 0;
+			padding: 0;
+			background-color: #f4f4f4;
+			display: flex;
+			flex-direction: column;
+			min-height: 100vh;
         }
+
+        /* Cabeçalho e Menu */
+		header {
+			background-color: #333;
+			color: white;
+			padding: 20px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-family: orbitron;
+			font-size: 20px;
+		}
+
+		.logo {
+			display: flex;
+			align-items: center;
+		}
+
+		.logo img {
+			width: 150px;
+			margin-right: 15px;
+		}
+
+		.title {
+			font-size: 2em;
+			font-weight: bold;
+		}
+
+		.menu {
+			background-color: #222;
+			color: white;
+			text-align: center;
+			padding: 10px;
+		}
+
+		.menu a {
+			color: white;
+			text-decoration: none;
+			margin: 0 15px;
+			font-size: 	1em;
+		}
+
+		.menu a:hover {
+			text-decoration: underline;
+		}
 
         .product-detail {
             border: 1px solid #ccc;
@@ -25,6 +82,8 @@
 
         h2 {
             margin-top: 0;
+            color: #333;
+			text-align: center;
         }
 
         p {
@@ -69,13 +128,69 @@
             background-color: #dc3545; /* Vermelho */
         }
 
+         /* Responsividade */
+         @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .menu a {
+                font-size: 0.9em;
+                margin: 0 8px;
+            }
+
+			header	{
+				flex-direction: column;
+				align-items: center;
+				text-align: center;
+			}
+
+			.logo img	{
+				width: 120px;
+				margin-bottom: 10px;
+			}
+
+			.title {
+				font-size: 1.8em;
+			}
+        }
+
+        /* Rodapé */
+        footer {
+            text-align: center;
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            width: 100%;
+            margin-top: auto;
+        }
+
     </style>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-<body>
 
+<body>
+    <!-- Cabeçalho -->
+	<header>
+		<img src="IMG/logo-zumbits.png" width="150px" alt="Logo Zumbits">
+		<h1><b>	Zumbits </b></h1><br>
+
+	</header>
+
+	<!-- Menu -->
+	<div class="menu">
+		<a href="#">Home</a>
+		<a href="#">Produtos</a>
+		<a href="#">Sobre</a>
+		<a href="#">Contato</a>
+	</div>
+
+    <!-- Rodapé -->
+	<footer>
+		<p>Copyright © 2025 | Zumbits </p>
+	</footer>
+
+    <!-- Detalhes do Prouto -->
     <div class="product-detail" id="productDetail">
         <p>Carregando detalhes...</p>
     </div>
