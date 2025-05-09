@@ -185,95 +185,98 @@
 		<a href="#">Contato</a>
 	</div>
 
+    <section>
     <!-- Script e Conteúdo dos Detalhes do Produto -->
-    <div class="product-detail" id="productDetail">
-        <p>Carregando detalhes...</p>
-    </div>
+        <h2>Detalhes do Produto</h2>
+        <div class="product-detail" id="productDetail">
+            <p>Carregando detalhes...</p>
+        </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const firebaseConfig = {
-				apiKey: "AIzaSyCjjy2B9jb2XZW4nIfMj1xDLogZc8oBd9M",
-				authDomain: "estoque-naturale.firebaseapp.com",
-				databaseURL: "https://estoque-naturale-default-rtdb.firebaseio.com",
-				projectId: "estoque-naturale",
-				storageBucket: "estoque-naturale.firebasestorage.app",
-				messagingSenderId: "204707025194",
-				appId: "1:204707025194:web:158dd6235e0996b6e54e53",
-				measurementId: "G-ZJMVMSTSBJ"
-			};
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyCjjy2B9jb2XZW4nIfMj1xDLogZc8oBd9M",
+                    authDomain: "estoque-naturale.firebaseapp.com",
+                    databaseURL: "https://estoque-naturale-default-rtdb.firebaseio.com",
+                    projectId: "estoque-naturale",
+                    storageBucket: "estoque-naturale.firebasestorage.app",
+                    messagingSenderId: "204707025194",
+                    appId: "1:204707025194:web:158dd6235e0996b6e54e53",
+                    measurementId: "G-ZJMVMSTSBJ"
+                };
 
-            firebase.initializeApp(firebaseConfig);
-            const db = firebase.database().ref("produtos");
+                firebase.initializeApp(firebaseConfig);
+                const db = firebase.database().ref("produtos");
 
-            const params = new URLSearchParams(window.location.search);
-            const id = params.get("id");
+                const params = new URLSearchParams(window.location.search);
+                const id = params.get("id");
 
-            const detailDiv = document.getElementById("productDetail");
+                const detailDiv = document.getElementById("productDetail");
 
-            if (!id) {
-                detailDiv.innerHTML = "<p>ID do produto não encontrado.</p>";
-                return;
-            }
+                if (!id) {
+                    detailDiv.innerHTML = "<p>ID do produto não encontrado.</p>";
+                    return;
+                }
 
-            db.child(id).once("value") // busca somente aquele produto
-                .then(snapshot => {
-                    const produto = snapshot.val();
+                db.child(id).once("value") // busca somente aquele produto
+                    .then(snapshot => {
+                        const produto = snapshot.val();
 
-                    if (!produto) {
-                        detailDiv.innerHTML = "<p>Produto não encontrado.</p>";
-                        return;
-                    }
+                        if (!produto) {
+                            detailDiv.innerHTML = "<p>Produto não encontrado.</p>";
+                            return;
+                        }
 
-                    const {
-                        descricao,
-                        precoCusto,
-                        precoVenda,
-                        categoria,
-                        marca,
-                        estoque,
-                        status,
-                        caracteristicas,
-                        fornecedor,
-                        dataCompra
-                    } = produto;
+                        const {
+                            descricao,
+                            precoCusto,
+                            precoVenda,
+                            categoria,
+                            marca,
+                            estoque,
+                            status,
+                            caracteristicas,
+                            fornecedor,
+                            dataCompra
+                        } = produto;
 
-                    detailDiv.innerHTML = `
-                     <h2>${descricao}</h2>
+                        detailDiv.innerHTML = `
+                        <h2>${descricao}</h2>
 
-                        <div class="product-info">
-                            <div class="info-item">
-                                <i class="fas fa-tag"></i> <strong>Marca:</strong> ${marca}
+                            <div class="product-info">
+                                <div class="info-item">
+                                    <i class="fas fa-tag"></i> <strong>Marca:</strong> ${marca}
+                                </div>
+                                
+                                <div class="info-item">
+                                    <i class="fas fa-dollar-sign"></i> <strong>Preço de Venda:</strong> R$ ${precoVenda?.toFixed(2) ?? "-"}
+                                </div>
+                                
+                                <div class="info-item">
+                                    <i class="fas fa-cogs"></i> <strong>Estoque:</strong> ${estoque ?? "-"}
+                                </div>
+                                
+                                <div class="info-item">
+                                    <i class="fas fa-check-circle"></i> 
+                                    <strong>Status:</strong> 
+                                    <span class="status ${status === 'em estoque' ? 'in-stock' : 'out-of-stock'}">${status}</span>
+                                </div>
+
+                                
+                                <div class="info-item">
+                                    <i class="fas fa-info-circle"></i> <strong>Características:</strong> ${caracteristicas}
+                                </div>
                             </div>
-                            
-                            <div class="info-item">
-                                <i class="fas fa-dollar-sign"></i> <strong>Preço de Venda:</strong> R$ ${precoVenda?.toFixed(2) ?? "-"}
-                            </div>
-                            
-                            <div class="info-item">
-                                <i class="fas fa-cogs"></i> <strong>Estoque:</strong> ${estoque ?? "-"}
-                            </div>
-                            
-                            <div class="info-item">
-                                <i class="fas fa-check-circle"></i> 
-                                <strong>Status:</strong> 
-                                <span class="status ${status === 'em estoque' ? 'in-stock' : 'out-of-stock'}">${status}</span>
-                            </div>
-
-                            
-                            <div class="info-item">
-                                <i class="fas fa-info-circle"></i> <strong>Características:</strong> ${caracteristicas}
-                            </div>
-                        </div>
-   
-                    `;
-                })
-                .catch(error => {
-                    console.error("Erro ao buscar produto:", error);
-                    detailDiv.innerHTML = "<p>Erro ao carregar produto.</p>";
-                });
-        });
-    </script>
+    
+                        `;
+                    })
+                    .catch(error => {
+                        console.error("Erro ao buscar produto:", error);
+                        detailDiv.innerHTML = "<p>Erro ao carregar produto.</p>";
+                    });
+            });
+        </script>
+    </section>
 
     <!-- Rodapé -->
 	<footer>
