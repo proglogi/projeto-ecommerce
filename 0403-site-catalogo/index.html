@@ -133,6 +133,74 @@
             cursor: pointer;
         }
 
+		/* Estilos do Detalhamento do Produto */
+		.product-detail {
+			margin-top: 20px auto;
+			border: 1px solid #ccc;
+			border-radius: 10px;
+			padding: 30px;
+			box-shadow: 0 0 10px rgba(0,0,0,0.1);
+			width: 90%;
+			max-width: 1000px;
+			text-align: left;
+		}
+
+		h2 {
+			margin-top: 0;
+			color: #333;
+			text-align: center;
+		}
+
+		p {
+			margin: 10px 0;
+		}
+
+		section {
+			display: flex;
+			justify-content: center;
+			padding: 20px;
+		}
+
+		.product-info {
+			display: flex;
+			flex-direction: column;
+			gap: 15px;
+			margin-top: 20px;
+			font-size: 1.1em;
+			width: 100%;
+		}
+
+		.info-item {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			justify-content: flex-start;
+		}
+
+		.info-item i {
+			font-size: 1.5em;
+			color: #333;
+		}
+
+		.info-item strong {
+			font-weight: bold;
+		}
+
+		.status {
+			padding: 5px 10px;
+			border-radius: 5px;
+			font-weight: bold;
+			color: white;
+		}
+
+		.in-stock {
+			background-color: #28a745;
+		}
+
+		.out-of-stock {
+			background-color: #dc3545;
+		}
+
         /* Responsividade */
         @media (max-width: 768px) {
             .catalog {
@@ -179,12 +247,13 @@
         }
 
 	</style>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 
 <body>
 	<!-- Cabeçalho -->
 	<header>
-		<img src="/Website/IMG/logo-zumbits.png" width="150px" alt="Logo Zumbits">
+		<img src="IMG/logo-zumbits.png" width="150px" alt="Logo Zumbits">
 		<h1><b>	Zumbits </b></h1><br>
 
 	</header>
@@ -198,10 +267,17 @@
 	</div>
 
 	<!-- Conteúdo do Catálogo -->
-	<section>
+	<section id="catalogSection">
 		<h2>Catálogo de Produtos</h2>
 		<div id="productList" class="catalog"></div>
 		<br>
+	</section>
+
+	<!-- Detalhamento do Produto (dentro da mesma página) -->
+	<section id="productDetailSection" style="display: none;">
+		<div class="product-detail" id="productDetail">
+			<p>Carregando detalhes...</p>
+		</div>
 	</section>
 
 	<!-- Rodapé -->
@@ -264,7 +340,7 @@
 					card.classList.add("product-card");
 	
 					card.innerHTML = `
-						<a href="product-detail.html?id=${id}" target="_blank" style="text-decoration: none; color: inherit; display: block;">
+						<a href="javascript:void(0);" onclick="loadProductDetail('${id}')">
 							<h4>${descricao}</h4>
 							<p>R$ ${precoVenda?.toFixed(2) ?? "0.00"}</p>
 							<p>Marca: ${marca}</p>
@@ -277,6 +353,63 @@
 				});
 			});
 		});
+
+		// Função para carregar os detalhes do produto
+		function loadProductDetail (productId) {
+			const catalogSection = document.getElementById("catalogSection");
+			const productDetailSection = document.getElementById("productDetailSection");
+			const productDetailDiv = document.getElementById ("productDetail");
+
+			// Esconde o catálogo e exibe o detalhamento
+			catalogSection.style.display = "none";
+			productDetailSection.style.display = "block";
+
+		// Buscar detalhes do produto no Firebase
+		firebase.database().ref(`produtos/${productId}`).get().then(snapshot => {
+			const produto = snapshot.val();
+			if (!produto) {
+				catalogSection.innerHTML = "<p>Produto não encontrado.</p>";
+				return;
+			}
+			
+			const {
+				descricao,
+				precoVenda,
+				precoCusto,
+				categoria,
+				marca,
+				estoque,
+				status,
+				caracteristicas,
+				fornecedor,
+				dataCompra
+				} = produto;
+
+			// Atualizando o conteúdo para mostrar os detalhes do produto
+			productDetailDiv.innerHTML = `
+			<h2>${descricao}</h2>
+			<div class="product-info">
+                        <div class="info-item">
+                            <i class="fas fa-tag"></i> <strong>Marca:</strong> ${marca}
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-dollar-sign"></i> <strong>Preço de Venda:</strong> R$ ${precoVenda?.toFixed(2) ?? "0.00"}
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-cogs"></i> <strong>Estoque:</strong> ${estoque ?? "-"}
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-check-circle"></i>
+                            <strong>Status:</strong> 
+                            <span class="status ${status === 'em estoque' ? 'in-stock' : 'out-of-stock'}">${status}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-info-circle"></i> <strong>Características:</strong> ${caracteristicas}
+                        </div>
+                    </div>
+                `;
+            });
+        }
 	</script>	
 </body>
 </html>
