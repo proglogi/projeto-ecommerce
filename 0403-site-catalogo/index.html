@@ -35,7 +35,8 @@
 	<div class="navbar">
 		<a href="#home">Home</a>
 		<div class="dropdown">
-			<button class="dropbtn">Produtos
+			<button class="dropbtn">
+				Produtos
 				<i class="fa fa-caret-down"></i>
 			</button>
 			<div class="dropdown-content">
@@ -56,8 +57,9 @@
 		<br>
 	</section>
 
-	<!-- Detalhamento do Produto (dentro da mesma página) -->
+	<!-- Detalhamento do Produto (inicialmente oculto) -->
 	<section id="productDetailSection" style="display: none;">
+		<button class="back-button" onclick="goBack()">&#8592; Voltar</button>
 		<div class="product-detail" id="productDetail">
 			<p>Carregando detalhes...</p>
 		</div>
@@ -148,42 +150,40 @@
 			catalogSection.style.display = "none";
 			productDetailSection.style.display = "block";
 
+			// Busca os dados do produto no Firebase
 			firebase.database().ref(`produtos/${productId}`).get().then(snapshot => {
 				const produto = snapshot.val();
+				
 				if (!produto) {
-					catalogSection.innerHTML = "<p>Produto não encontrado.</p>";
+					productDetailDiv.innerHTML = "<p>Produto não encontrado.</p>";
 					return;
 				}
 
 				const {
 					descricao,
 					precoVenda,
-					precoCusto,
-					categoria,
 					marca,
 					estoque,
 					status,
 					caracteristicas,
-					fornecedor,
-					dataCompra,
-					imagem // <--- pega a imagem aqui também
+					imagem
 				} = produto;
 
 				productDetailDiv.innerHTML = `
-					<button class="back-button" onclick="goBack()">&#8592; Voltar</button>
 					<div class="product-detail-container">
-						<h2>${descricao}</h2>
+						<h2 class="product-title">${descricao}</h2>
 						<div class="detail-content">
-							<img src="${produto.imagem}" alt="${descricao}" class="product-detail-image">
-					<div class="product-info">
-							<div class="info-item"><i class="fas fa-tag"></i> <strong>Marca:</strong> ${marca}</div>
-							<div class="info-item"><i class="fas fa-dollar-sign"></i> <strong>Preço de Venda:</strong> R$ ${precoVenda?.toFixed(2) ?? "0.00"}</div>
-							<div class="info-item"><i class="fas fa-cogs"></i> <strong>Estoque:</strong> ${estoque ?? "-"}</div>
-							<div class="info-item">
-								<i class="fas fa-check-circle"></i> <strong>Status:</strong> 
-								<span class="status ${status === 'em estoque' ? 'in-stock' : 'out-of-stock'}">${status}</span>
+							<img src="${imagem}" alt="${descricao}" class="product-detail-image">
+							<div class="product-info">
+								<div class="info-item"><i class="fas fa-tag"></i> <strong>Marca:</strong> ${marca}</div>
+								<div class="info-item"><i class="fas fa-dollar-sign"></i> <strong>Preço de Venda:</strong> R$ ${precoVenda?.toFixed(2) ?? "0.00"}</div>
+								<div class="info-item"><i class="fas fa-cogs"></i> <strong>Estoque:</strong> ${estoque ?? "-"}</div>
+								<div class="info-item">
+									<i class="fas fa-check-circle"></i> <strong>Status:</strong> 
+									<span class="status ${status === 'em estoque' ? 'in-stock' : 'out-of-stock'}">${status}</span>
+								</div>
+								<div class="info-item"><i class="fas fa-info-circle"></i> <strong>Características:</strong> ${caracteristicas}</div>
 							</div>
-							<div class="info-item"><i class="fas fa-info-circle"></i> <strong>Características:</strong> ${caracteristicas}</div>
 						</div>
 					</div>
 				`;
@@ -198,4 +198,5 @@
 
 	</script>	
 </body>
+
 </html>
