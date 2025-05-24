@@ -20,8 +20,7 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
 
-	<link rel="stylesheet" href="/0403-site-catalogo/CSS/stylesheet.css" media="screen" />
-
+	<link rel="stylesheet" href="/banco-de-dados/0403-site-catalogo/CSS/stylesheet.css" media="screen">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 
@@ -30,13 +29,23 @@
 	<header>
 		<img src="https://res.cloudinary.com/dsf2txoqr/image/upload/v1747959665/svim96ficucptxatnuum.png" width="150px" alt="Logo Zumbits">
 		<h1><b>	Zumbits </b></h1><br>
-
 	</header>
 
 	<!-- Menu -->
-	<div class="menu">
-		<a href="#">Home</a>
-		<a href="#">Produtos</a>
+	<div class="navbar">
+		<a href="#home">Home</a>
+		<div class="dropdown">
+			<button class="dropbtn">Produtos
+				<i class="fa fa-caret-down"></i>
+			</button>
+			<div class="dropdown-content">
+				<a href="#">Colecionáveis</a>
+				<a href="#">Eletrônicos</a>
+				<a href="#">HQs</a>
+				<a href="#">Jogos</a>
+				<a href="#">Pôsters</a>
+			</div>
+		</div>
 		<a href="#">Sobre</a>
 		<a href="#">Contato</a>
 	</div>
