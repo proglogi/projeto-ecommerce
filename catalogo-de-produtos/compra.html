@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Confirmar Compra - Zumbits</title>
+
+  <!-- Firebase compat libs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    h1, h2 { color: #333; }
+    label, input, button { display: block; margin-top: 1rem; }
+    input[type=number] { width: 100px; padding: 0.3rem; }
+    button { padding: 0.5rem 1rem; background-color: #007bff; color: white; border: none; cursor: pointer; }
+    button:hover { background-color: #0056b3; }
+  </style>
+</head>
+<body>
+
+  <h1>Confirmar Compra</h1>
+  <div id="compraConteudo">
+    <p>Carregando produto...</p>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCjjy2B9jb2XZW4nIfMj1xDLogZc8oBd9M",
+        authDomain: "estoque-naturale.firebaseapp.com",
+        databaseURL: "https://estoque-naturale-default-rtdb.firebaseio.com",
+        projectId: "estoque-naturale",
+        storageBucket: "estoque-naturale.firebasestorage.app",
+        messagingSenderId: "204707025194",
+        appId: "1:204707025194:web:158dd6235e0996b6e54e53",
+        measurementId: "G-ZJMVMSTSBJ"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    const compraDiv = document.getElementById('compraConteudo');
+
+    // Pega ID do produto da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+
+    if (!productId) {
+      compraDiv.innerHTML = '<p>Produto inválido.</p>';
+    } else {
+      const produtoRef = firebase.database().ref('produtos/' + productId);
+
+      produtoRef.get().then(snapshot => {
+        const produto = snapshot.val();
+        if (!produto) {
+          compraDiv.innerHTML = '<p>Produto não encontrado.</p>';
+          return;
+        }
+
+        compraDiv.innerHTML = `
+          <h2>${produto.descricao}</h2>
+          <p>Preço: R$ ${produto.precoVenda?.toFixed(2) ?? '0.00'}</p>
+          <p>Estoque disponível: ${produto.estoque}</p>
+          <label for="quantidade">Quantidade:</label>
+          <input type="number" id="quantidade" name="quantidade" min="1" max="${produto.estoque}" value="1" />
+          <button id="confirmarBtn">Confirmar Compra</button>
+        `;
+
+        document.getElementById('confirmarBtn').addEventListener('click', () => {
+          const qtd = parseInt(document.getElementById('quantidade').value);
+
+          if (isNaN(qtd) || qtd < 1) {
+            alert('Informe uma quantidade válida.');
+            return;
+          }
+          if (qtd > produto.estoque) {
+            alert('Quantidade maior que o estoque disponível.');
+            return;
+          }
+
+          // Atualiza estoque no Firebase atomically
+          produtoRef.transaction(prodAtual => {
+            if (prodAtual && prodAtual.estoque >= qtd) {
+              prodAtual.estoque -= qtd;
+              return prodAtual;
+            } else {
+              alert('Estoque insuficiente para esta quantidade.');
+              return; // cancela a transação
+            }
+          }).then(() => {
+            alert('Compra realizada com sucesso!');
+            window.location.href = 'index.html'; // volta para página principal
+          }).catch(err => {
+            console.error('Erro na transação:', err);
+            alert('Erro ao processar a compra.');
+          });
+        });
+      }).catch(err => {
+        console.error('Erro ao buscar produto:', err);
+        compraDiv.innerHTML = '<p>Erro ao carregar o produto.</p>';
+      });
+    }
+  </script>
+
+</body>
+</html>
+

@@ -65,6 +65,15 @@
 		</div>
 	</section>
 
+	<!-- Interface de Compra -->
+	<section id="purchaseSection" style="display: none;">
+		<button class="back-button" onclick="goBack()">&#8592; Voltar</button>
+		<div class="product-purchase" id="purchaseDetail">
+			<p>Carregando...</p>
+		</div>
+	</section>
+	
+
 	<!-- Rodapé -->
 	<footer>
 		<p>2025 | Feito por Nicholly Gonzaga dos Santos</p>
@@ -132,6 +141,7 @@
 							<p>Marca: ${marca}</p>
 							<p>Estoque: ${estoque ?? "-"}</p>
 							<p>Status: ${status}</p>
+							<button onclick="window.location.href='compra.html?id=${id}'">Comprar</button>
 						</a>
 					`;
 	
@@ -196,6 +206,64 @@
 			document.getElementById("catalogSection").style.display = "block";
 		}
 
+		function iniciarCompra(productId) {
+			const catalogSection = document.getElementById("catalogSection");
+			const productDetailSection = document.getElementById("productDetailSection");
+			const purchaseSection = document.getElementById("purchaseSection");
+			const purchaseDetailDiv = document.getElementById("purchaseDetail");
+
+			catalogSection.style.display = "none";
+			productDetailSection.style.display = "none";
+			purchaseSection.style.display = "block";
+
+			firebase.database().ref(`produtos/${productId}`).get().then(snapshot => {
+				const produto = snapshot.val();
+				if (!produto) {
+					purchaseDetailDiv.innerHTML = "<p>Produto não encontrado.</p>";
+					return;
+				}
+
+				purchaseDetailDiv.innerHTML = `
+					<h2>Comprar: ${produto.descricao}</h2>
+					<p>Preço: R$ ${produto.precoVenda?.toFixed(2) ?? "0.00"}</p>
+					<p>Estoque disponível: ${produto.estoque}</p>
+					<label for="quantidade">Quantidade:</label>
+					<input type="number" id="quantidadeCompra" name="quantidade" min="1" max="${produto.estoque}" value="1" />
+					<br><br>
+					<button onclick="confirmarCompra('${productId}', ${produto.estoque})">Confirmar Compra</button>
+				`;
+			});
+		}
+
+		function confirmarCompra(productId, estoqueDisponivel) {
+			const qtd = parseInt(document.getElementById("quantidadeCompra").value);
+
+			if (qtd > estoqueDisponivel) {
+				alert("Quantidade excede o estoque disponível.");
+				return;
+			}
+
+			const produtoRef = firebase.database().ref(`produtos/${productId}`);
+
+			produtoRef.transaction((produtoAtual) => {
+				if (produtoAtual && produtoAtual.estoque >= qtd) {
+					produtoAtual.estoque -= qtd;
+					return produtoAtual;
+				} else {
+					alert('Estoque insuficiente.');
+				return;
+			}).then(result => {
+			if (result.committed) {
+				alert('Compra realizada com sucesso!');
+				window.location.href = 'index.html';
+			} else {
+				alert('A compra foi cancelada (sem estoque suficiente).');
+			}
+			}).catch(err => {
+			console.error('Erro na transação:', err);
+			alert('Erro ao processar a compra.');
+			});
+		}
 	</script>	
 </body>
 
