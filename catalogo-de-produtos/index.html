@@ -249,9 +249,12 @@
 				if (produtoAtual && produtoAtual.estoque >= qtd) {
 					produtoAtual.estoque -= qtd;
 					return produtoAtual;
+				} else if (!produtoAtual) {
+					alert('Produto não encontrado.');
 				} else {
 					alert('Estoque insuficiente.');
 				return;
+				}
 			}).then(result => {
 			if (result.committed) {
 				alert('Compra realizada com sucesso!');
@@ -260,8 +263,8 @@
 				alert('A compra foi cancelada (sem estoque suficiente).');
 			}
 			}).catch(err => {
-			console.error('Erro na transação:', err);
-			alert('Erro ao processar a compra.');
+				console.error('Erro na transação:', err);
+				alert('Erro ao processar a compra.');
 			});
 		}
 	</script>	

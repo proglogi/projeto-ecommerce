@@ -78,7 +78,7 @@
             return;
           }
 
-          // Atualiza estoque no Firebase atomically
+          // Atualiza estoque no Firebase
           produtoRef.transaction(prodAtual => {
             if (prodAtual && prodAtual.estoque >= qtd) {
               prodAtual.estoque -= qtd;
