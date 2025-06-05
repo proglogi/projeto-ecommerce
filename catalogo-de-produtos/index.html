@@ -65,14 +65,16 @@
 		</div>
 	</section>
 
-	<!-- Interface de Compra -->
-	<section id="purchaseSection" style="display: none;">
-		<button class="back-button" onclick="goBack()">&#8592; Voltar</button>
-		<div class="product-purchase" id="purchaseDetail">
-			<p>Carregando...</p>
-		</div>
-	</section>
-	
+	<!-- Pop-up de Confirmação de Compra -->
+	<div id="popup" class="popup" style="display: none;">
+	<div class="popup-conteudo">
+		<span class="fechar" id="fechar">&times;</span>
+		<h2>Confirmação de Compra</h2>
+		<p id="popupTexto">Você deseja realmente comprar este item?</p>
+		<button onclick="confirmarPopup()">Confirmar</button>
+	</div>
+	</div>
+
 
 	<!-- Rodapé -->
 	<footer>
@@ -103,7 +105,7 @@
 	
 			// Executa mudanças em 'produtos'
 			db.on("value", (snapshot) => {
-				console.log("🔥 Firebase snapshot bruto:", snapshot.val());
+				console.log("Firebase snapshot bruto:", snapshot.val());
 
 				const list = document.getElementById("productList");
 				list.innerHTML = ""; // limpa os cards antes de renderizar novamente
@@ -142,6 +144,7 @@
 							<p>Estoque: ${estoque ?? "-"}</p>
 							<p>Status: ${status}</p>
 						</a>
+						<button class="botao-comprar" onclick="abrirPopup('${descricao}', '${precoVenda?.toFixed(2)}')">Comprar</button>
 					`;
 	
 					list.appendChild(card);
@@ -231,39 +234,6 @@
 					<br><br>
 					<button onclick="confirmarCompra('${productId}', ${produto.estoque})">Confirmar Compra</button>
 				`;
-			});
-		}
-
-		function confirmarCompra(productId, estoqueDisponivel) {
-			const qtd = parseInt(document.getElementById("quantidadeCompra").value);
-
-			if (qtd > estoqueDisponivel) {
-				alert("Quantidade excede o estoque disponível.");
-				return;
-			}
-
-			const produtoRef = firebase.database().ref(`produtos/${productId}`);
-
-			produtoRef.transaction((produtoAtual) => {
-				if (produtoAtual && produtoAtual.estoque >= qtd) {
-					produtoAtual.estoque -= qtd;
-					return produtoAtual;
-				} else if (!produtoAtual) {
-					alert('Produto não encontrado.');
-				} else {
-					alert('Estoque insuficiente.');
-				return;
-				}
-			}).then(result => {
-			if (result.committed) {
-				alert('Compra realizada com sucesso!');
-				window.location.href = 'index.html';
-			} else {
-				alert('A compra foi cancelada (sem estoque suficiente).');
-			}
-			}).catch(err => {
-				console.error('Erro na transação:', err);
-				alert('Erro ao processar a compra.');
 			});
 		}
 	</script>	
