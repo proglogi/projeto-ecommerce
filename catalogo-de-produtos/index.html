@@ -68,11 +68,22 @@
 	<!-- Pop-up de Confirmação de Compra -->
 	<div id="popup" class="popup" style="display: none;">
 		<div class="popup-conteudo">
-			<span class="fechar" id="fechar">&times;</span>
+			<span class="fechar" id="fechar" onclick="fecharPopup()">&times;</span>
 			<h2>Confirmação de Compra</h2>
 			<p id="popupTexto">Você deseja realmente comprar este item?</p>
+			
 			<label for="quantidadeCompra">Quantidade:</label>
 			<input type="number" id="quantidadeCompra" name="quantidadeCompra" min="1" value="1" />
+
+			<label for="nome">Nome:</label>
+                        <input type="text" id="nome" name="nome" required />
+
+                        <label for="email">E-mail:</label>
+                        <input type="email" id="email" name="email" required />
+
+                        <label for="cep">CEP:</label>
+                        <input type="text" id="cep" name="cep" pattern="\d{5}-?\d{3}" required placeholder="00000-000" />
+			
 			<br><br>
 			<button onclick="confirmarPopup()">Confirmar</button>
 		</div>
