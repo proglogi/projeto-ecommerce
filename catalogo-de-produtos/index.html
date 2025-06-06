@@ -147,7 +147,7 @@
 							<p>Estoque: ${estoque ?? "-"}</p>
 							<p>Status: ${status}</p>
 						</a>
-						<button class="botao-comprar" onclick="abrirPopup('${descricao}', '${precoVenda?.toFixed(2)}', ${estoque ?? 0})">Comprar</button>
+						<button class="botao-comprar" onclick="abrirPopup('${id}', '${descricao}', '${precoVenda?.toFixed(2)}', ${estoque ?? 0})">Comprar</button>
 					`;
 
 					list.appendChild(card);
@@ -212,15 +212,18 @@
 		}
 
 		// Pop-up de Compra
-		function abrirPopup(descricao, preco, estoque) {
+		function abrirPopup(productId, descricao, preco, estoque) {
 		const popup = document.getElementById("popup");
 		const texto = document.getElementById("popupTexto");
 		const inputQtd = document.getElementById("quantidadeCompra");
 
-		texto.innerText = `Você deseja realmente comprar "${descricao}" por R$ ${preco}?`;
+		texto.innerText = `Você deseja comprar "${descricao}" por R$ ${preco}?`;
 		inputQtd.max = estoque;
 		inputQtd.value = 1;
 		inputQtd.min = 1;
+
+		popup.dataset.productId = productId;
+		popup.dataset.estoque = estoque;
 
 		if (estoque === 0) {
 			inputQtd.disabled = true;
@@ -230,28 +233,46 @@
 		}
 
 		popup.style.display = "block";
+		}
 
 		// Guardar valores para confirmar compra
 		popup.dataset.descricao = descricao;
 		popup.dataset.preco = preco;
 		popup.dataset.estoque = estoque;
-		}
 
 		function confirmarPopup() {
 		const popup = document.getElementById("popup");
-		const qtd = parseInt(document.getElementById("quantidadeCompra").value, 10);
+		const productId = popup.dataset.productId;
 		const estoque = parseInt(popup.dataset.estoque, 10);
+		const qtd = parseInt(document.getElementById("quantidadeCompra").value, 10);
 
 		if (qtd > estoque) {
 			alert(`Quantidade excede o estoque disponível (${estoque}).`);
 			return;
 		}
 
-		alert(`Compra confirmada: ${qtd} unidade(s). (simulação)`);
+		const produtoRef = firebase.database().ref(`produtos/${productId}`);
 
-		popup.style.display = "none";
+		produtoRef.transaction((produtoAtual) => {
+			if (produtoAtual && produtoAtual.estoque >= qtd) {
+			produtoAtual.estoque -= qtd;
+			return produtoAtual;
+			} else {
+			alert('Estoque insuficiente ou produto não encontrado.');
+			return;
+			}
+		}).then(result => {
+			if (result.committed) {
+			alert(`Compra confirmada! Você comprou ${qtd} unidade(s).`);
+			document.getElementById("popup").style.display = "none";
+			} else {
+			alert('A compra foi cancelada.');
+			}
+		}).catch(err => {
+			console.error('Erro ao atualizar estoque:', err);
+			alert('Erro ao processar a compra.');
+		});
 		}
-
 	</script>
 </body>
 
