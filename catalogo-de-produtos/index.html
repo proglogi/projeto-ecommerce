@@ -71,24 +71,22 @@
 			<span class="fechar" id="fechar" onclick="fecharPopup()">&times;</span>
 			<h2>Confirmação de Compra</h2>
 			<p id="popupTexto">Você deseja realmente comprar este item?</p>
-			
+
 			<label for="quantidadeCompra">Quantidade:</label>
 			<input type="number" id="quantidadeCompra" name="quantidadeCompra" min="1" value="1" />
-
+			<br>
 			<label for="nome">Nome:</label>
-                        <input type="text" id="nome" name="nome" required />
-
-                        <label for="email">E-mail:</label>
-                        <input type="email" id="email" name="email" required />
-
-                        <label for="cep">CEP:</label>
-                        <input type="text" id="cep" name="cep" pattern="\d{5}-?\d{3}" required placeholder="00000-000" />
-			
+			<input type="text" id="nome" name="nome" required />
+			<br>
+			<label for="email">E-mail:</label>
+			<input type="email" id="email" name="email" required placeholder="exemplo@email.com" />
+			<br>
+			<label for="cep">CEP:</label>
+			<input type="text" id="cep" name="cep" pattern="\d{5}-?\d{3}" required placeholder="00000-000" />
 			<br><br>
 			<button onclick="confirmarPopup()">Confirmar</button>
 		</div>
 	</div>
-
 
 	<!-- Rodapé -->
 	<footer>
@@ -149,17 +147,24 @@
 					const card = document.createElement("div");
 					card.classList.add("product-card");
 
+					const isEsgotado = estoque <= 0;
+
+					card.classList.toggle("esgotado", isEsgotado);
+
 					card.innerHTML = `
 						<a href="javascript:void(0);" onclick="loadProductDetail('${id}')">
-							<img src="${produto.imagem}" alt="${descricao}" class="product-image">
-							<h4>${descricao}</h4>
-							<p>R$ ${precoVenda?.toFixed(2) ?? "0.00"}</p>
-							<p>Marca: ${marca}</p>
-							<p>Estoque: ${estoque ?? "-"}</p>
-							<p>Status: ${status}</p>
+								<img src="${produto.imagem}" alt="${descricao}" class="product-image">
+								<h4>${descricao}</h4>
+								<p class="price">R$ ${precoVenda?.toFixed(2) ?? "0.00"}</p>
+								<p class="brand">${marca}</p>
 						</a>
-						<button class="botao-comprar" onclick="abrirPopup('${id}', '${descricao}', '${precoVenda?.toFixed(2)}', ${estoque ?? 0})">Comprar</button>
-					`;
+						${isEsgotado
+							? `<button class="botao-esgotado" onclick="avisarDisponibilidade('${id}', '${descricao}')">Avise-me quando disponível</button>`
+							: `<button class="botao-comprar" onclick="abrirPopup('${id}', '${descricao}', '${precoVenda?.toFixed(2)}', ${estoque ?? 0})">Comprar</button>`
+						}
+				`;
+
+
 
 					list.appendChild(card);
 					console.log("Imagem URL do produto:", produto.imagem);
@@ -224,26 +229,26 @@
 
 		// Pop-up de Compra
 		function abrirPopup(productId, descricao, preco, estoque) {
-		const popup = document.getElementById("popup");
-		const texto = document.getElementById("popupTexto");
-		const inputQtd = document.getElementById("quantidadeCompra");
+			const popup = document.getElementById("popup");
+			const texto = document.getElementById("popupTexto");
+			const inputQtd = document.getElementById("quantidadeCompra");
 
-		texto.innerText = `Você deseja comprar "${descricao}" por R$ ${preco}?`;
-		inputQtd.max = estoque;
-		inputQtd.value = 1;
-		inputQtd.min = 1;
+			texto.innerText = `Você deseja comprar "${descricao}" por R$ ${preco}?`;
+			inputQtd.max = estoque;
+			inputQtd.value = 1;
+			inputQtd.min = 1;
 
-		popup.dataset.productId = productId;
-		popup.dataset.estoque = estoque;
+			popup.dataset.productId = productId;
+			popup.dataset.estoque = estoque;
 
-		if (estoque === 0) {
-			inputQtd.disabled = true;
-			texto.innerText = `Produto "${descricao}" está esgotado.`;
-		} else {
-			inputQtd.disabled = false;
-		}
+			if (estoque === 0) {
+				inputQtd.disabled = true;
+				texto.innerText = `Produto "${descricao}" está esgotado.`;
+			} else {
+				inputQtd.disabled = false;
+			}
 
-		popup.style.display = "block";
+			popup.style.display = "block";
 		}
 
 		// Guardar valores para confirmar compra
@@ -251,80 +256,103 @@
 		popup.dataset.preco = preco;
 		popup.dataset.estoque = estoque;
 
-	        function confirmarPopup() {
-  const popup = document.getElementById("popup");
-  const productId = popup.dataset.productId;
-  const estoque = parseInt(popup.dataset.estoque, 10);
-  const qtd = parseInt(document.getElementById("quantidadeCompra").value, 10);
-  const nome = document.getElementById("nome").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const cep = document.getElementById("cep").value.trim();
+		function confirmarPopup() {
+			const popup = document.getElementById("popup");
+			const productId = popup.dataset.productId;
+			const estoque = parseInt(popup.dataset.estoque, 10);
+			const qtd = parseInt(document.getElementById("quantidadeCompra").value, 10);
+			const nome = document.getElementById("nome").value.trim();
+			const email = document.getElementById("email").value.trim();
+			const cep = document.getElementById("cep").value.trim();
 
-  if (!nome || !email || !cep) {
-    alert("Por favor, preencha todos os campos.");
-    return;
-  }
+			if (!nome || !email || !cep) {
+				alert("Por favor, preencha todos os campos.");
+				return;
+			}
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    alert("E-mail inválido.");
-    return;
-  }
+			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			if (!emailRegex.test(email)) {
+				alert("E-mail inválido.");
+				return;
+			}
 
-  const cepRegex = /^\d{5}-?\d{3}$/;
-  if (!cepRegex.test(cep)) {
-    alert("CEP inválido. Formato esperado: 00000-000.");
-    return;
-  }
+			const cepRegex = /^\d{5}-?\d{3}$/;
+			if (!cepRegex.test(cep)) {
+				alert("CEP inválido. Formato esperado: 00000-000.");
+				return;
+			}
 
-  if (qtd > estoque) {
-    alert(`Quantidade excede o estoque disponível (${estoque}).`);
-    return;
-  }
+			if (qtd > estoque) {
+				alert(`Quantidade excede o estoque disponível (${estoque}).`);
+				return;
+			}
 
-  const produtoRef = firebase.database().ref(`produtos/${productId}`);
+			const produtoRef = firebase.database().ref(`produtos/${productId}`);
 
-  produtoRef.transaction((produtoAtual) => {
-    if (produtoAtual && produtoAtual.estoque >= qtd) {
-      produtoAtual.estoque -= qtd;
-      return produtoAtual;
-    } else {
-      alert("Estoque insuficiente ou produto não encontrado.");
-      return;
-    }
-  }).then(result => {
-    if (result.committed) {
-      // Salva dados da compra
-      const compra = {
-        produtoId: productId,
-        nome,
-        email,
-        cep,
-        quantidade: qtd,
-        data: new Date().toISOString()
-      };
+			produtoRef.transaction((produtoAtual) => {
+				if (produtoAtual && produtoAtual.estoque >= qtd) {
+					produtoAtual.estoque -= qtd;
+					return produtoAtual;
+				} else {
+					alert("Estoque insuficiente ou produto não encontrado.");
+					return;
+				}
+			}).then(result => {
+				if (result.committed) {
+					// Salva dados da compra
+					const compra = {
+						produtoId: productId,
+						nome,
+						email,
+						cep,
+						quantidade: qtd,
+						data: new Date().toISOString()
+					};
 
-      firebase.database().ref("compras").push(compra);
+					firebase.database().ref("compras").push(compra);
 
-      alert(`Compra confirmada! Você comprou ${qtd} unidade(s).`);
-      fecharPopup();
-    } else {
-      alert("A compra foi cancelada.");
-    }
-  }).catch(err => {
-    console.error("Erro ao processar a compra:", err);
-    alert("Erro ao processar a compra.");
-  });
+					alert(`Compra confirmada! Você comprou ${qtd} unidade(s).`);
+					fecharPopup();
+				} else {
+					alert("A compra foi cancelada.");
+				}
+			}).catch(err => {
+				console.error("Erro ao processar a compra:", err);
+				alert("Erro ao processar a compra.");
+			});
 		}
 
 		function fecharPopup() {
-                  document.getElementById("popup").style.display = "none";
-                  document.getElementById("nome").value = "";
-                  document.getElementById("email").value = "";
-                  document.getElementById("cep").value = "";
-                  document.getElementById("quantidadeCompra").value = 1;
-	  }
-			
+			document.getElementById("popup").style.display = "none";
+			document.getElementById("nome").value = "";
+			document.getElementById("email").value = "";
+			document.getElementById("cep").value = "";
+			document.getElementById("quantidadeCompra").value = 1;
+		}
+
+		function avisarDisponibilidade(productId, descricao) {
+			const email = prompt(`Informe seu e-mail para ser avisado quando "${descricao}" voltar ao estoque:`);
+
+			if (!email) return;
+
+			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			if (!emailRegex.test(email)) {
+				alert("E-mail inválido.");
+				return;
+			}
+
+			const pedidoAviso = {
+				produtoId: productId,
+				email: email,
+				dataSolicitacao: new Date().toISOString()
+			};
+
+			firebase.database().ref("avisosDisponibilidade").push(pedidoAviso);
+
+			alert(`Obrigado! Você será avisado quando "${descricao}" estiver disponível.`);
+		}
+
+
 	</script>
 </body>
 
