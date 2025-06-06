@@ -71,6 +71,9 @@
 			<span class="fechar" id="fechar">&times;</span>
 			<h2>Confirmação de Compra</h2>
 			<p id="popupTexto">Você deseja realmente comprar este item?</p>
+			<label for="quantidadeCompra">Quantidade:</label>
+			<input type="number" id="quantidadeCompra" name="quantidadeCompra" min="1" value="1" />
+			<br><br>
 			<button onclick="confirmarPopup()">Confirmar</button>
 		</div>
 	</div>
@@ -144,7 +147,7 @@
 							<p>Estoque: ${estoque ?? "-"}</p>
 							<p>Status: ${status}</p>
 						</a>
-						<button class="botao-comprar" onclick="abrirPopup('${descricao}', '${precoVenda?.toFixed(2)}')">Comprar</button>
+						<button class="botao-comprar" onclick="abrirPopup('${descricao}', '${precoVenda?.toFixed(2)}', ${estoque ?? 0})">Comprar</button>
 					`;
 
 					list.appendChild(card);
@@ -209,27 +212,44 @@
 		}
 
 		// Pop-up de Compra
-		function abrirPopup(descricao, preco) {
-			const popup = document.getElementById("popup");
-			const texto = document.getElementById("popupTexto");
-			texto.innerText = `Você deseja realmente comprar "${descricao}" por R$ ${preco}?`;
-			popup.style.display = "block";
+		function abrirPopup(descricao, preco, estoque) {
+		const popup = document.getElementById("popup");
+		const texto = document.getElementById("popupTexto");
+		const inputQtd = document.getElementById("quantidadeCompra");
+
+		texto.innerText = `Você deseja realmente comprar "${descricao}" por R$ ${preco}?`;
+		inputQtd.max = estoque;
+		inputQtd.value = 1;
+		inputQtd.min = 1;
+
+		if (estoque === 0) {
+			inputQtd.disabled = true;
+			texto.innerText = `Produto "${descricao}" está esgotado.`;
+		} else {
+			inputQtd.disabled = false;
 		}
 
-		document.getElementById("fechar").onclick = function () {
-			document.getElementById("popup").style.display = "none";
-		};
+		popup.style.display = "block";
 
-		window.onclick = function (event) {
-			const popup = document.getElementById("popup");
-			if (event.target === popup) {
-				popup.style.display = "none";
-			}
-		};
+		// Guardar valores para confirmar compra
+		popup.dataset.descricao = descricao;
+		popup.dataset.preco = preco;
+		popup.dataset.estoque = estoque;
+		}
 
 		function confirmarPopup() {
-			alert("Compra confirmada! (simulação)");
-			document.getElementById("popup").style.display = "none";
+		const popup = document.getElementById("popup");
+		const qtd = parseInt(document.getElementById("quantidadeCompra").value, 10);
+		const estoque = parseInt(popup.dataset.estoque, 10);
+
+		if (qtd > estoque) {
+			alert(`Quantidade excede o estoque disponível (${estoque}).`);
+			return;
+		}
+
+		alert(`Compra confirmada: ${qtd} unidade(s). (simulação)`);
+
+		popup.style.display = "none";
 		}
 
 	</script>

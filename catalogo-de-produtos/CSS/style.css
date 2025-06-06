@@ -195,6 +195,13 @@
 		cursor: pointer;
 	}
 
+	#quantidadeCompra {
+		width: 60px;
+		text-align: center;
+		font-size: 16px;
+	}
+
+
 	/* Página de Detalhamento */
 	
 	#productDetailSection {
