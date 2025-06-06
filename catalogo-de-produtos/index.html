@@ -13,7 +13,7 @@
 	<meta name="author" content="Nicholly Gonzaga">
 
 	<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
 	<!-- Importando a fonte "Orbitron" do Google Fonts -->
 	<link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,7 +28,7 @@
 	<!-- Cabeçalho -->
 	<header>
 		<img src="https://res.cloudinary.com/dsf2txoqr/image/upload/v1747959665/svim96ficucptxatnuum.png" width="150px" alt="Logo Zumbits">
-		<h1><b>	Zumbits </b></h1><br>
+		<h1><b> Zumbits </b></h1><br>
 	</header>
 
 	<!-- Menu -->
@@ -67,12 +67,12 @@
 
 	<!-- Pop-up de Confirmação de Compra -->
 	<div id="popup" class="popup" style="display: none;">
-	<div class="popup-conteudo">
-		<span class="fechar" id="fechar">&times;</span>
-		<h2>Confirmação de Compra</h2>
-		<p id="popupTexto">Você deseja realmente comprar este item?</p>
-		<button onclick="confirmarPopup()">Confirmar</button>
-	</div>
+		<div class="popup-conteudo">
+			<span class="fechar" id="fechar">&times;</span>
+			<h2>Confirmação de Compra</h2>
+			<p id="popupTexto">Você deseja realmente comprar este item?</p>
+			<button onclick="confirmarPopup()">Confirmar</button>
+		</div>
 	</div>
 
 
@@ -84,7 +84,7 @@
 	<script>
 		document.addEventListener("DOMContentLoaded", function () {
 			console.log("Página carregada, iniciando Firebase...");
-	
+
 			// Configuração do Firebase
 			const firebaseConfig = {
 				apiKey: "AIzaSyCjjy2B9jb2XZW4nIfMj1xDLogZc8oBd9M",
@@ -96,28 +96,28 @@
 				appId: "1:204707025194:web:158dd6235e0996b6e54e53",
 				measurementId: "G-ZJMVMSTSBJ"
 			};
-	
+
 			// Inicializa o Firebase
 			firebase.initializeApp(firebaseConfig);
-	
+
 			// Referência ao nó 'produtos'
 			const db = firebase.database().ref("produtos");
-	
+
 			// Executa mudanças em 'produtos'
 			db.on("value", (snapshot) => {
 				console.log("Firebase snapshot bruto:", snapshot.val());
 
 				const list = document.getElementById("productList");
 				list.innerHTML = ""; // limpa os cards antes de renderizar novamente
-	
+
 				const dados = snapshot.val();
 				console.log("Dados recebidos do Firebase:", dados);
-	
+
 				if (!dados) {
 					list.innerHTML = "<p>Nenhum produto cadastrado.</p>";
 					return;
 				}
-	
+
 				Object.entries(dados).forEach(([id, produto]) => {
 					const {
 						descricao,
@@ -131,10 +131,10 @@
 						fornecedor,
 						dataCompra
 					} = produto;
-	
+
 					const card = document.createElement("div");
 					card.classList.add("product-card");
-	
+
 					card.innerHTML = `
 						<a href="javascript:void(0);" onclick="loadProductDetail('${id}')">
 							<img src="${produto.imagem}" alt="${descricao}" class="product-image">
@@ -146,7 +146,7 @@
 						</a>
 						<button class="botao-comprar" onclick="abrirPopup('${descricao}', '${precoVenda?.toFixed(2)}')">Comprar</button>
 					`;
-	
+
 					list.appendChild(card);
 					console.log("Imagem URL do produto:", produto.imagem);
 				});
@@ -154,10 +154,10 @@
 		});
 
 		// Função para carregar os detalhes do produto
-		function loadProductDetail (productId) {
+		function loadProductDetail(productId) {
 			const catalogSection = document.getElementById("catalogSection");
 			const productDetailSection = document.getElementById("productDetailSection");
-			const productDetailDiv = document.getElementById ("productDetail");
+			const productDetailDiv = document.getElementById("productDetail");
 
 			catalogSection.style.display = "none";
 			productDetailSection.style.display = "block";
@@ -165,7 +165,7 @@
 			// Busca os dados do produto no Firebase
 			firebase.database().ref(`produtos/${productId}`).get().then(snapshot => {
 				const produto = snapshot.val();
-				
+
 				if (!produto) {
 					productDetailDiv.innerHTML = "<p>Produto não encontrado.</p>";
 					return;
@@ -208,35 +208,31 @@
 			document.getElementById("catalogSection").style.display = "block";
 		}
 
-		function iniciarCompra(productId) {
-			const catalogSection = document.getElementById("catalogSection");
-			const productDetailSection = document.getElementById("productDetailSection");
-			const purchaseSection = document.getElementById("purchaseSection");
-			const purchaseDetailDiv = document.getElementById("purchaseDetail");
-
-			catalogSection.style.display = "none";
-			productDetailSection.style.display = "none";
-			purchaseSection.style.display = "block";
-
-			firebase.database().ref(`produtos/${productId}`).get().then(snapshot => {
-				const produto = snapshot.val();
-				if (!produto) {
-					purchaseDetailDiv.innerHTML = "<p>Produto não encontrado.</p>";
-					return;
-				}
-
-				purchaseDetailDiv.innerHTML = `
-					<h2>Comprar: ${produto.descricao}</h2>
-					<p>Preço: R$ ${produto.precoVenda?.toFixed(2) ?? "0.00"}</p>
-					<p>Estoque disponível: ${produto.estoque}</p>
-					<label for="quantidade">Quantidade:</label>
-					<input type="number" id="quantidadeCompra" name="quantidade" min="1" max="${produto.estoque}" value="1" />
-					<br><br>
-					<button onclick="confirmarCompra('${productId}', ${produto.estoque})">Confirmar Compra</button>
-				`;
-			});
+		// Pop-up de Compra
+		function abrirPopup(descricao, preco) {
+			const popup = document.getElementById("popup");
+			const texto = document.getElementById("popupTexto");
+			texto.innerText = `Você deseja realmente comprar "${descricao}" por R$ ${preco}?`;
+			popup.style.display = "block";
 		}
-	</script>	
+
+		document.getElementById("fechar").onclick = function () {
+			document.getElementById("popup").style.display = "none";
+		};
+
+		window.onclick = function (event) {
+			const popup = document.getElementById("popup");
+			if (event.target === popup) {
+				popup.style.display = "none";
+			}
+		};
+
+		function confirmarPopup() {
+			alert("Compra confirmada! (simulação)");
+			document.getElementById("popup").style.display = "none";
+		}
+
+	</script>
 </body>
 
 </html>
