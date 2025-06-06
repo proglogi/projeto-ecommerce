@@ -251,49 +251,80 @@
 		popup.dataset.preco = preco;
 		popup.dataset.estoque = estoque;
 
-		function confirmarPopup() {
-		const popup = document.getElementById("popup");
-		const productId = popup.dataset.productId;
-		const estoque = parseInt(popup.dataset.estoque, 10);
-		const qtd = parseInt(document.getElementById("quantidadeCompra").value, 10);
+	        function confirmarPopup() {
+  const popup = document.getElementById("popup");
+  const productId = popup.dataset.productId;
+  const estoque = parseInt(popup.dataset.estoque, 10);
+  const qtd = parseInt(document.getElementById("quantidadeCompra").value, 10);
+  const nome = document.getElementById("nome").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const cep = document.getElementById("cep").value.trim();
 
-		if (qtd > estoque) {
-			alert(`Quantidade excede o estoque disponível (${estoque}).`);
-			return;
+  if (!nome || !email || !cep) {
+    alert("Por favor, preencha todos os campos.");
+    return;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    alert("E-mail inválido.");
+    return;
+  }
+
+  const cepRegex = /^\d{5}-?\d{3}$/;
+  if (!cepRegex.test(cep)) {
+    alert("CEP inválido. Formato esperado: 00000-000.");
+    return;
+  }
+
+  if (qtd > estoque) {
+    alert(`Quantidade excede o estoque disponível (${estoque}).`);
+    return;
+  }
+
+  const produtoRef = firebase.database().ref(`produtos/${productId}`);
+
+  produtoRef.transaction((produtoAtual) => {
+    if (produtoAtual && produtoAtual.estoque >= qtd) {
+      produtoAtual.estoque -= qtd;
+      return produtoAtual;
+    } else {
+      alert("Estoque insuficiente ou produto não encontrado.");
+      return;
+    }
+  }).then(result => {
+    if (result.committed) {
+      // Salva dados da compra
+      const compra = {
+        produtoId: productId,
+        nome,
+        email,
+        cep,
+        quantidade: qtd,
+        data: new Date().toISOString()
+      };
+
+      firebase.database().ref("compras").push(compra);
+
+      alert(`Compra confirmada! Você comprou ${qtd} unidade(s).`);
+      fecharPopup();
+    } else {
+      alert("A compra foi cancelada.");
+    }
+  }).catch(err => {
+    console.error("Erro ao processar a compra:", err);
+    alert("Erro ao processar a compra.");
+  });
 		}
 
-		const produtoRef = firebase.database().ref(`produtos/${productId}`);
-
-		produtoRef.transaction((produtoAtual) => {
-			if (produtoAtual && produtoAtual.estoque >= qtd) {
-			produtoAtual.estoque -= qtd;
-			return produtoAtual;
-			} else {
-			alert('Estoque insuficiente ou produto não encontrado.');
-			return;
-			}
-		}).then(result => {
-			if (result.committed) {
-			alert(`Compra confirmada! Você comprou ${qtd} unidade(s).`);
-
-			// Fecha o pop-up
-			popup.style.display = "none";
-
-			// Volta para o catálogo (caso esteja em outra seção)
-			document.getElementById("productDetailSection").style.display = "none";
-			document.getElementById("purchaseSection").style.display = "none";
-			document.getElementById("catalogSection").style.display = "block";
-
-			// O listener do Firebase (db.on("value")) já vai atualizar o catálogo automaticamente!
-
-			} else {
-			alert('A compra foi cancelada.');
-			}
-		}).catch(err => {
-			console.error('Erro ao atualizar estoque:', err);
-			alert('Erro ao processar a compra.');
-		});
-		}
+		function fecharPopup() {
+                  document.getElementById("popup").style.display = "none";
+                  document.getElementById("nome").value = "";
+                  document.getElementById("email").value = "";
+                  document.getElementById("cep").value = "";
+                  document.getElementById("quantidadeCompra").value = 1;
+	  }
+			
 	</script>
 </body>
 
