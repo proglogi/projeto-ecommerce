@@ -264,7 +264,17 @@
 		}).then(result => {
 			if (result.committed) {
 			alert(`Compra confirmada! Você comprou ${qtd} unidade(s).`);
-			document.getElementById("popup").style.display = "none";
+
+			// Fecha o pop-up
+			popup.style.display = "none";
+
+			// Volta para o catálogo (caso esteja em outra seção)
+			document.getElementById("productDetailSection").style.display = "none";
+			document.getElementById("purchaseSection").style.display = "none";
+			document.getElementById("catalogSection").style.display = "block";
+
+			// O listener do Firebase (db.on("value")) já vai atualizar o catálogo automaticamente!
+
 			} else {
 			alert('A compra foi cancelada.');
 			}
