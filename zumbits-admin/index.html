@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tela de Login</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <div class="login-container">
+    <h2>Login</h2>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Senha" />
+    <button onclick="login()">Entrar</button>
+    <p class="error" id="error-msg"></p>
+    <p id="mensagem-login" style="display: none; color: green; margin-top: 10px;">f</p>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <!-- Scripts locais -->
+  <script src="assets/js/firebase-config.js"></script>
+  <script src="assets/js/script.js"></script>
+</body>
+</html>
